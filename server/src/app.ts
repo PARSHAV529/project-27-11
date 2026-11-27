@@ -1,6 +1,6 @@
 import cors from 'cors';
 import express from 'express';
-import helmet from 'helmet';
+import * as helmetModule from 'helmet';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { apiLimiter } from './middleware/rateLimiters.js';
@@ -16,6 +16,11 @@ export const app = express();
 if (env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
+
+const helmet =
+  typeof helmetModule.default === 'function'
+    ? helmetModule.default
+    : (helmetModule as unknown as typeof helmetModule.default);
 
 app.disable('x-powered-by');
 app.use(helmet());
