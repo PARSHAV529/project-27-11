@@ -14,6 +14,12 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters'),
   JWT_EXPIRES_IN: z.string().min(1).default('1d'),
   CLIENT_URL: z.string().min(1, 'CLIENT_URL is required').default('http://localhost:5173'),
+  LOGIN_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(5),
+  LOGIN_RATE_LIMIT_WINDOW_MIN: z.coerce.number().int().positive().default(15),
+  SIGNUP_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
+  SIGNUP_RATE_LIMIT_WINDOW_MIN: z.coerce.number().int().positive().default(60),
+  API_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(200),
+  API_RATE_LIMIT_WINDOW_MIN: z.coerce.number().int().positive().default(15),
 });
 
 const parsed = envSchema.safeParse(process.env);

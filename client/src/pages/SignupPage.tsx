@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { getApiErrorMessage } from '@/api/axios'
+import { getErrorMessage } from '@/lib/getErrorMessage'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -62,7 +62,7 @@ export function SignupPage() {
       toast.success('Account created successfully')
       navigate('/dashboard', { replace: true })
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'Failed to create account'))
+      toast.error(getErrorMessage(error, 'Failed to create account'))
     }
   }
 

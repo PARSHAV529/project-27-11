@@ -5,6 +5,7 @@ import { Ticket } from '../models/Ticket.js';
 import type { AuthenticatedUser } from '../types/express.js';
 import { AppError } from '../utils/AppError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { escapeRegex } from '../utils/escapeRegex.js';
 
 export const createTicketSchema = z.object({
   title: z
@@ -41,10 +42,6 @@ const TICKET_DETAIL_POPULATE = [
   { path: 'assignedTo', select: 'name email role' },
   { path: 'comments.author', select: 'name role' },
 ];
-
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 /** Determine whether a user is allowed to view (and comment on) a ticket. */
 export function canViewTicket(user: AuthenticatedUser, ticket: { createdBy: unknown }): boolean {

@@ -54,6 +54,14 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     statusCode = err.statusCode;
     message = err.message;
     errors = err.errors;
+  } else if (
+    err instanceof Error &&
+    'status' in err &&
+    typeof (err as { status?: unknown }).status === 'number'
+  ) {
+    const httpErr = err as Error & { status: number; type?: string };
+    statusCode = httpErr.status;
+    message = httpErr.type === 'entity.too.large' ? 'Request payload is too large' : httpErr.message;
   } else if (err instanceof Error) {
     message = env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message;
   }

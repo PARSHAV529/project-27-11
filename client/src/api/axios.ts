@@ -36,13 +36,3 @@ api.interceptors.response.use(
     return Promise.reject(error)
   },
 )
-
-export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong'): string {
-  if (axios.isAxiosError<{ message?: string }>(error)) {
-    return error.response?.data?.message || error.message || fallback
-  }
-  if (error instanceof Error) {
-    return error.message
-  }
-  return fallback
-}

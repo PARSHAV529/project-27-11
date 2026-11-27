@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { getApiErrorMessage } from '@/api/axios'
 import { createTicket } from '@/api/tickets'
+import { getErrorMessage } from '@/lib/getErrorMessage'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -66,7 +66,7 @@ export function CreateTicketDialog({ onCreated }: { onCreated: () => void }) {
       setOpen(false)
       onCreated()
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'Failed to create ticket'))
+      toast.error(getErrorMessage(error, 'Failed to create ticket'))
     }
   }
 

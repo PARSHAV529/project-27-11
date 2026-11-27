@@ -2,8 +2,8 @@ import axios from 'axios'
 import { Loader2, Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { getApiErrorMessage } from '@/api/axios'
 import { getTickets } from '@/api/tickets'
+import { getErrorMessage } from '@/lib/getErrorMessage'
 import { CreateTicketDialog } from '@/components/CreateTicketDialog'
 import { PriorityBadge } from '@/components/PriorityBadge'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -148,7 +148,7 @@ export function DashboardPage() {
         setHasLoaded(true)
       } catch (err) {
         if (!active || axios.isCancel(err)) return
-        setError(getApiErrorMessage(err, 'Failed to load tickets'))
+        setError(getErrorMessage(err, 'Failed to load tickets'))
         setHasLoaded(true)
       } finally {
         if (active) {

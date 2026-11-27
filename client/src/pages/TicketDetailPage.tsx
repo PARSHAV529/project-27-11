@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { getApiErrorMessage } from '@/api/axios'
 import {
   addComment,
   assignToMe,
@@ -14,6 +13,7 @@ import {
   getTicket,
   updateStatus,
 } from '@/api/tickets'
+import { getErrorMessage } from '@/lib/getErrorMessage'
 import { PriorityBadge } from '@/components/PriorityBadge'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Badge } from '@/components/ui/badge'
@@ -105,7 +105,7 @@ export function TicketDetailPage() {
         if (axios.isAxiosError(err) && err.response?.status === 404) {
           setNotFound(true)
         } else {
-          setError(getApiErrorMessage(err, 'Failed to load ticket'))
+          setError(getErrorMessage(err, 'Failed to load ticket'))
         }
       } finally {
         if (active) {
@@ -130,7 +130,7 @@ export function TicketDetailPage() {
       form.reset()
       toast.success('Comment added')
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Failed to add comment'))
+      toast.error(getErrorMessage(err, 'Failed to add comment'))
     }
   }
 
@@ -143,7 +143,7 @@ export function TicketDetailPage() {
       setDeleteDialogOpen(false)
       navigate('/dashboard', { replace: true })
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Failed to delete ticket'))
+      toast.error(getErrorMessage(err, 'Failed to delete ticket'))
     } finally {
       setDeleting(false)
     }
@@ -155,9 +155,9 @@ export function TicketDetailPage() {
     try {
       const updated = await updateStatus(ticket._id, nextStatus)
       setTicket(updated)
-      toast.success('Ticket status updated')
+      toast.success('Status updated')
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Failed to update status'))
+      toast.error(getErrorMessage(err, 'Failed to update status'))
     } finally {
       setUpdatingStatus(false)
     }
@@ -171,7 +171,7 @@ export function TicketDetailPage() {
       setTicket(updated)
       toast.success('Ticket assigned to you')
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'Failed to assign ticket'))
+      toast.error(getErrorMessage(err, 'Failed to assign ticket'))
     } finally {
       setAssigning(false)
     }
