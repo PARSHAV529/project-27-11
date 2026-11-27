@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 // Temporarily disabled due to Vercel deployment TS2349 error on helmet types.
 // import helmet from 'helmet';
+import { connectDB } from './config/db.js';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 // Temporarily disabled due to Vercel deployment TS2349 error on express-rate-limit types.
@@ -52,6 +53,20 @@ app.use(
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
+// Ensure MongoDB is connected in serverless environments (e.g., Vercel) where server.ts is not executed.
+app.use('/api', async (req, _res, next) => {
+  if (req.path === '/health') {
+    next();
+    return;
+  }
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Temporarily disabled due to Vercel deployment TS2349 error on express-rate-limit types.
 // app.use('/api', apiLimiter);
 app.use('/api/health', healthRoutes);
@@ -61,3 +76,5 @@ app.use('/api/users', userRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+
+export default app;
