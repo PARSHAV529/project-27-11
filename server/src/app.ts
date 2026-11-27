@@ -1,6 +1,7 @@
 import cors from 'cors';
-import express, { type RequestHandler } from 'express';
-import * as helmetModule from 'helmet';
+import express from 'express';
+// Temporarily disabled due to Vercel deployment TS2349 error on helmet types.
+// import helmet from 'helmet';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { apiLimiter } from './middleware/rateLimiters.js';
@@ -17,15 +18,9 @@ if (env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
-type HelmetFactory = () => RequestHandler;
-
-const helmet: HelmetFactory =
-  typeof (helmetModule as unknown as { default?: unknown }).default === 'function'
-    ? (helmetModule as unknown as { default: HelmetFactory }).default
-    : (helmetModule as unknown as HelmetFactory);
-
 app.disable('x-powered-by');
-app.use(helmet());
+// Temporarily disabled due to Vercel deployment TS2349 error on helmet types.
+// app.use(helmet());
 
 const allowedOrigins = env.CLIENT_URL.split(',')
   .map((origin) => origin.trim())
