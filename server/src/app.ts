@@ -4,7 +4,8 @@ import express from 'express';
 // import helmet from 'helmet';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
-import { apiLimiter } from './middleware/rateLimiters.js';
+// Temporarily disabled due to Vercel deployment TS2349 error on express-rate-limit types.
+// import { apiLimiter } from './middleware/rateLimiters.js';
 import authRoutes from './routes/auth.routes.js';
 import healthRoutes from './routes/health.routes.js';
 import ticketRoutes from './routes/ticket.routes.js';
@@ -51,7 +52,8 @@ app.use(
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-app.use('/api', apiLimiter);
+// Temporarily disabled due to Vercel deployment TS2349 error on express-rate-limit types.
+// app.use('/api', apiLimiter);
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketRoutes);
