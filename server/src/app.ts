@@ -1,5 +1,5 @@
 import cors from 'cors';
-import express from 'express';
+import express, { type RequestHandler } from 'express';
 import * as helmetModule from 'helmet';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
@@ -17,10 +17,12 @@ if (env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
-const helmet =
-  typeof helmetModule.default === 'function'
-    ? helmetModule.default
-    : (helmetModule as unknown as typeof helmetModule.default);
+type HelmetFactory = () => RequestHandler;
+
+const helmet: HelmetFactory =
+  typeof (helmetModule as unknown as { default?: unknown }).default === 'function'
+    ? (helmetModule as unknown as { default: HelmetFactory }).default
+    : (helmetModule as unknown as HelmetFactory);
 
 app.disable('x-powered-by');
 app.use(helmet());
