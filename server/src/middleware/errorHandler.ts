@@ -2,40 +2,58 @@ import type { ErrorRequestHandler, NextFunction, Request, Response } from 'expre
 import mongoose from 'mongoose';
 import { ZodError } from 'zod';
 import { env } from '../config/env.js';
-import { ApiError } from '../utils/ApiError.js';
+import { AppError } from '../utils/AppError.js';
 
-/** Convert unmatched routes into a 404 ApiError for the global error handler. */
-export function notFoundHandler(req: Request, _res: Response, next: NextFunction): void {
-  next(new ApiError(404, `Route not found: ${req.method} ${req.originalUrl}`));
+interface MongoDuplicateKeyError {
+  code?: number;
+  keyValue?: Record<string, unknown>;
 }
 
-/** Centralized Express error handler mapping known errors to structured JSON responses. */
+/** Return 404 for any unmatched route. */
+export function notFoundHandler(req: Request, _res: Response, next: NextFunction): void {
+  next(new AppError(404, `Route not found: ${req.method} ${req.originalUrl}`));
+}
+
+/** Centralized error handler formatting validation, database, JWT, and app errors. */
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   let statusCode = 500;
   let message = 'Internal Server Error';
-  let errors: unknown[] = [];
+  let errors: Array<{ field: string; message: string }> | unknown[] = [];
 
-  if (err instanceof ApiError) {
-    statusCode = err.statusCode;
-    message = err.message;
-    errors = err.errors;
-  } else if (err instanceof ZodError) {
+  if (err instanceof ZodError) {
     statusCode = 400;
     message = 'Validation failed';
     errors = err.issues.map((issue) => ({
-      path: issue.path.join('.'),
+      field: issue.path.join('.'),
       message: issue.message,
     }));
+  } else if ((err as MongoDuplicateKeyError)?.code === 11000) {
+    statusCode = 409;
+    const keyValue = (err as MongoDuplicateKeyError).keyValue ?? {};
+    const field = Object.keys(keyValue)[0] ?? 'field';
+    message = field === 'email' ? 'Email already registered' : `Duplicate value for ${field}`;
   } else if (err instanceof mongoose.Error.ValidationError) {
     statusCode = 400;
-    message = 'Database validation failed';
+    message = 'Validation failed';
     errors = Object.values(err.errors).map((fieldErr) => ({
-      path: fieldErr.path,
+      field: fieldErr.path,
       message: fieldErr.message,
     }));
   } else if (err instanceof mongoose.Error.CastError) {
     statusCode = 400;
     message = `Invalid ${err.path}: ${String(err.value)}`;
+  } else if (
+    err instanceof Error &&
+    (err.name === 'JsonWebTokenError' ||
+      err.name === 'TokenExpiredError' ||
+      err.name === 'NotBeforeError')
+  ) {
+    statusCode = 401;
+    message = err.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token';
+  } else if (err instanceof AppError) {
+    statusCode = err.statusCode;
+    message = err.message;
+    errors = err.errors;
   } else if (err instanceof Error) {
     message = env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message;
   }
@@ -46,7 +64,6 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
 
   res.status(statusCode).json({
     success: false,
-    statusCode,
     message,
     ...(errors.length > 0 ? { errors } : {}),
     ...(env.NODE_ENV !== 'production' && err instanceof Error ? { stack: err.stack } : {}),

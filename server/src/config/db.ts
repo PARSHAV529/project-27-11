@@ -3,7 +3,7 @@ import { env } from './env.js';
 
 let listenersRegistered = false;
 
-/** Connect to MongoDB using the validated MONGODB_URI connection string. */
+/** Connect to MongoDB using the validated MONGO_URI connection string. */
 export async function connectDB(): Promise<typeof mongoose> {
   if (!listenersRegistered) {
     mongoose.connection.on('connected', () => {
@@ -21,7 +21,7 @@ export async function connectDB(): Promise<typeof mongoose> {
     listenersRegistered = true;
   }
 
-  return mongoose.connect(env.MONGODB_URI, {
+  return mongoose.connect(env.MONGO_URI, {
     serverSelectionTimeoutMS: 5000,
   });
 }

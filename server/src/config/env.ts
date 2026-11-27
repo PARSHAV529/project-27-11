@@ -4,14 +4,16 @@ import { z } from 'zod';
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().int().positive().default(5000),
-  MONGODB_URI: z
+  MONGO_URI: z
     .string()
-    .min(1, 'MONGODB_URI is required')
+    .min(1, 'MONGO_URI is required')
     .refine(
       (val) => val.startsWith('mongodb://') || val.startsWith('mongodb+srv://'),
-      'MONGODB_URI must start with mongodb:// or mongodb+srv://',
+      'MONGO_URI must start with mongodb:// or mongodb+srv://',
     ),
-  CLIENT_URL: z.string().default('http://localhost:5173'),
+  JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters'),
+  JWT_EXPIRES_IN: z.string().min(1).default('1d'),
+  CLIENT_URL: z.string().min(1, 'CLIENT_URL is required').default('http://localhost:5173'),
 });
 
 const parsed = envSchema.safeParse(process.env);
